@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import App from "../../App";
 
 function DurationExercise({ name }) {
   // Track elapsed time in milliseconds
@@ -7,24 +8,8 @@ function DurationExercise({ name }) {
   // Track whether the timer is running
   const [running, setRunning] = useState(false);
 
-  useEffect(() => {                                         
-    let timer = null;
-
-    if (running) {
-      timer = setInterval(() => {
-        setTime(prevTime => prevTime + 10);
-      }, 10);
-    }
-
-    return () => clearInterval(timer);
-  }, [running]);
-
-    /* Cleanup to prevent multiple timers
-    Referenced React documentation:
-    - Timers such as setInterval should be started inside useEffect
-    and cleaned up with clearInterval to avoid memory leaks.
-     https://react.dev/reference/react/useEffect
-    */
+  // Track whether to show the previous screen
+  const [previous, setPrevious] = useState(false);
 
   // Time calculations
   const minutes = Math.floor(time / 60000);
@@ -36,20 +21,65 @@ function DurationExercise({ name }) {
   const formattedSeconds = String(seconds).padStart(2, "0");
   const formattedMilliseconds = String(milliseconds).padStart(3, "0");
 
+  useEffect(() => {
+    let timer = null;
+
+    if (running) {
+      timer = setInterval(() => {
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+    }
+
+    return () => clearInterval(timer);
+  }, [running]);
+
+  /* Cleanup to prevent multiple timers
+    Referenced React documentation:
+    - Timers such as setInterval should be started inside useEffect
+    and cleaned up with clearInterval to avoid memory leaks.
+     https://react.dev/reference/react/useEffect
+    */
+
+  if (previous) {
+    return (
+      <div>
+        <App />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2>{name}</h2>
 
-      <p>{formattedMinutes}:{formattedSeconds}:{formattedMilliseconds}</p>
+      <p>
+        {formattedMinutes}:{formattedSeconds}:{formattedMilliseconds}
+      </p>
 
       <button onClick={() => setRunning(true)}> Start </button>
 
       <button onClick={() => setRunning(false)}> Stop </button>
 
-      <button onClick={() => {
+      <br />
+
+      <button
+        onClick={() => {
           setRunning(false);
           setTime(0);
-        }}> Reset </button>
+        }}
+      >
+        Reset
+      </button>
+
+      <button
+        onClick={() => {
+          if (!previous) {
+            setPrevious(true);
+          }
+        }}
+      >
+        Return
+      </button>
     </div>
   );
 }
